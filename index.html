@@ -4,6 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>VRG-AI — Smart Command Center</title>
+<meta name="description" content="AI-powered search, resume builder, QR generator and tools hub"/>
+<meta name="theme-color" content="#F8DE7F"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="VRG-AI"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -472,7 +481,7 @@ footer{background:var(--dark4);border-top:1px solid var(--border);padding:2.8rem
               <div class="rp-name" id="rpName">Your Name</div>
               <div class="rp-role" id="rpRole">Your Role</div>
               <div class="rp-contact" id="rpContact">
-                <span id="rpEmail">you@email.com</span>
+                <span id="rpEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="423b2d3702272f232b2e6c212d2f">[email&#160;protected]</a></span>
                 <span id="rpPhone">+91 98765 43210</span>
                 <span id="rpLoc">Chennai, India</span>
                 <span id="rpWeb">linkedin.com/in/you</span>
@@ -555,7 +564,7 @@ footer{background:var(--dark4);border-top:1px solid var(--border);padding:2.8rem
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── SEARCH DATA ──
 var SD=[
   {i:'🎨',t:'Canva',d:'Design logos, posters, social media and presentations.',s:'Tools',l:'#tools'},
@@ -621,14 +630,14 @@ async function heroAsk(){
   txt.innerHTML='<span class="loading">Thinking<span>.</span><span>.</span><span>.</span></span>';
   box.classList.add('show');
   try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{
+    var r=await fetch('/api/ask',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,
-        messages:[{role:'user',content:'Answer this question clearly and helpfully in 3-5 sentences: '+q}]})
+      body:JSON.stringify({prompt:'Answer this question clearly and helpfully in 3-5 sentences: '+q})
     });
+    if(!r.ok){var errData=await r.json();throw new Error(errData.error||'HTTP '+r.status);}
     var d=await r.json();
-    txt.textContent=(d.content&&d.content[0]&&d.content[0].text)||'Could not get answer. Try again.';
-  }catch(e){txt.textContent='Connection error. Please check your internet.';}
+    txt.textContent=d.result||'Could not get answer. Try again.';
+  }catch(e){txt.textContent='Error: '+error.message+'. Make sure ANTHROPIC_API_KEY is set in Netlify environment variables.';}
 }
 function quickAsk(q){
   document.getElementById('heroSearchInp').value=q;
@@ -679,14 +688,14 @@ async function askAI(){
   txt.innerHTML='<span class="loading">Generating<span>.</span><span>.</span><span>.</span></span>';
   result.classList.add('show');
   try{
-    var r=await fetch('https://api.anthropic.com/v1/messages',{
+    var r=await fetch('/api/ask',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
-        messages:[{role:'user',content:prompt+'\n\n'+q+'\n\nBe detailed, practical and actionable.'}]})
+      body:JSON.stringify({prompt:prompt+'\n\n'+q+'\n\nBe detailed, practical and actionable.'})
     });
+    if(!r.ok){var errData=await r.json();throw new Error(errData.error||'HTTP '+r.status);}
     var d=await r.json();
-    txt.textContent=(d.content&&d.content[0]&&d.content[0].text)||'Could not generate. Try again.';
-  }catch(e){txt.textContent='Connection error. Please check your internet.';}
+    txt.textContent=d.result||'Could not generate. Try again.';
+  }catch(e){txt.textContent='Error: '+error.message+'. Make sure ANTHROPIC_API_KEY is set in Netlify environment variables.';}
 }
 function clearAI(){
   document.getElementById('aiInput').value='';
@@ -800,17 +809,16 @@ function downloadResume(){
   var name=document.getElementById('rName').value||'Resume';
   html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff'}).then(function(canvas){
     var link=document.createElement('a');
-    link.download=name.replace(/\s+/g,'-')+'-Resume.png';
-    link.href=canvas.toDataURL('image/png');
-    link.click();
-    setTimeout(function(){
-      window.print();
-    },500);
+    link.download=name.r    link.href=canvas.toDataURL('image/png');link.click();});
+}
+updateResume();
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js').then(function(){
+      console.log('VRG-AI PWA ready!');
+    });
   });
 }
-
-// Init resume
-updateResume();
 </script>
 </body>
 </html>
