@@ -51,9 +51,15 @@
 
 ```
 vrg-ai/
-├── index.html      # Full website — all features in one file
-├── README.md       # This file
-└── .gitignore      # Git ignore rules
+├── index.html
+├── netlify.toml
+├── manifest.json
+├── sw.js
+├── icon-192.png
+├── icon-512.png
+└── netlify/
+    └── functions/
+        └── ask.js
 ```
 
 ---
